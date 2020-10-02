@@ -38,6 +38,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -63,7 +66,7 @@ public class VuforiaAiming extends OpMode {
     private DcMotor leftMotor;
 
     public double neededAngle;
-    public double firstAngle;
+    public double robotAngle;
 
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final boolean PHONE_IS_LANDSCAPE = true;
@@ -252,9 +255,10 @@ public class VuforiaAiming extends OpMode {
 
     public void loop() {
 
-        firstAngle = angles.firstAngle;
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        robotAngle = angles.firstAngle;
 
-        telemetry.addData("Robot Angle", firstAngle);
+        telemetry.addData("Robot Angle", robotAngle);
 
         targetVisible = false;
         for (VuforiaTrackable trackable : allTrackables) {
@@ -285,17 +289,38 @@ public class VuforiaAiming extends OpMode {
             telemetry.addData("Visible Target", "none");
         }
 
-        telemetry.update();
+        if (neededAngle - robotAngle > 10) {
 
-        if (neededAngle - firstAngle > 2) {
-            rightMotor.setPower(neededAngle);
-            leftMotor.setPower(-neededAngle);
-        } else if (neededAngle - firstAngle < -2) {
-            leftMotor.setPower(neededAngle);
-            rightMotor.setPower(-neededAngle);
+            leftMotor.setPower(0.5);
+            rightMotor.setPower(-0.5);
+
+        }
+
+        else if (neededAngle - robotAngle < 10) {
+
+            leftMotor.setPower(-0.5);
+            rightMotor.setPower(0.5);
+
+        }
+
+        else if (neededAngle - robotAngle > 0.625) {
+
+            leftMotor.setPower(neededAngle - robotAngle);
+            rightMotor.setPower(-(neededAngle - robotAngle));
+
+        } else if (neededAngle - robotAngle < 0.625) {
+
+            leftMotor.setPower(-(neededAngle - robotAngle));
+            rightMotor.setPower(neededAngle - robotAngle);
+
         } else {
+
             leftMotor.setPower(0.0);
             rightMotor.setPower(0.0);
+
         }
+        telemetry.addData("Calculated Angle", neededAngle - robotAngle);
+
+        telemetry.update();
     }
 }
