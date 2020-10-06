@@ -284,41 +284,49 @@ public class VuforiaAiming extends OpMode {
             telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
             telemetry.addData("Needed Angle", Math.toDegrees(Math.atan(translation.get(0) / translation.get(2))));
             neededAngle = Math.toDegrees(Math.atan(translation.get(0) / translation.get(2)));
+
+            if (neededAngle - robotAngle > 10) {
+
+                leftMotor.setPower(0.5);
+                rightMotor.setPower(-0.5);
+
+            }
+
+            else if (neededAngle - robotAngle < -10) {
+
+                leftMotor.setPower(-0.5);
+                rightMotor.setPower(0.5);
+
+            }
+
+            else if (neededAngle - robotAngle > 0.625) {
+
+                leftMotor.setPower((neededAngle - robotAngle) * (1/40));
+                rightMotor.setPower(-(neededAngle - robotAngle) * (1/40));
+
+            }
+
+            else if (neededAngle - robotAngle < -0.625) {
+
+                leftMotor.setPower(-(neededAngle - robotAngle) * (1/40));
+                rightMotor.setPower((neededAngle - robotAngle) * (1/40));
+
+            }
+
+            else {
+
+                leftMotor.setPower(0.0);
+                rightMotor.setPower(0.0);
+
+            }
         }
         else {
             telemetry.addData("Visible Target", "none");
-        }
-
-        if (neededAngle - robotAngle > 10) {
-
-            leftMotor.setPower(0.5);
-            rightMotor.setPower(-0.5);
-
-        }
-
-        else if (neededAngle - robotAngle < 10) {
-
-            leftMotor.setPower(-0.5);
-            rightMotor.setPower(0.5);
-
-        }
-
-        else if (neededAngle - robotAngle > 0.625) {
-
-            leftMotor.setPower(neededAngle - robotAngle);
-            rightMotor.setPower(-(neededAngle - robotAngle));
-
-        } else if (neededAngle - robotAngle < 0.625) {
-
-            leftMotor.setPower(-(neededAngle - robotAngle));
-            rightMotor.setPower(neededAngle - robotAngle);
-
-        } else {
 
             leftMotor.setPower(0.0);
             rightMotor.setPower(0.0);
-
         }
+
         telemetry.addData("Calculated Angle", neededAngle - robotAngle);
 
         telemetry.update();
