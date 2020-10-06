@@ -61,12 +61,22 @@ public class VuforiaAiming extends OpMode {
 
     BNO055IMU imu;
     Orientation angles;
+    BNO055IMU.Parameters parameters;
 
     private DcMotor rightMotor;
     private DcMotor leftMotor;
 
     public double neededAngle;
-    public double robotAngle;
+    public double currentAngle;
+
+    public double error;
+    public double lastError;
+    public double integral;
+    public double derivative;
+
+    public static final double KP = .005;
+    public static final double KI = 0;
+    public static final double KD = 0;
 
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final boolean PHONE_IS_LANDSCAPE = true;
@@ -87,8 +97,10 @@ public class VuforiaAiming extends OpMode {
     private static final float halfField = 72 * mmPerInch;
     private static final float quadField  = 36 * mmPerInch;
 
-    final float CAMERA_FORWARD_DISPLACEMENT  = 0; //4.0f * mmPerInch
-    final float CAMERA_VERTICAL_DISPLACEMENT = 0; //8.0f * mmPerInch
+    OpenGLMatrix robotFromCamera;
+
+    final float CAMERA_FORWARD_DISPLACEMENT  = 0;
+    final float CAMERA_VERTICAL_DISPLACEMENT = 0;
     final float CAMERA_LEFT_DISPLACEMENT     = 0;
 
     private OpenGLMatrix lastLocation;
@@ -125,7 +137,7 @@ public class VuforiaAiming extends OpMode {
         leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -151,12 +163,13 @@ public class VuforiaAiming extends OpMode {
             phoneXRotate = 90 ;
         }
 
-        OpenGLMatrix robotFromCamera = OpenGLMatrix
+        robotFromCamera = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, phoneYRotate, phoneZRotate, phoneXRotate));
 
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         vuforiaParameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
         vuforiaParameters.vuforiaLicenseKey = VUFORIA_KEY;
         vuforiaParameters.cameraDirection = CAMERA_CHOICE;
 
@@ -256,9 +269,9 @@ public class VuforiaAiming extends OpMode {
     public void loop() {
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        robotAngle = angles.firstAngle;
+        currentAngle = angles.firstAngle;
 
-        telemetry.addData("Robot Angle", robotAngle);
+        telemetry.addData("Robot Angle", currentAngle);
 
         targetVisible = false;
         for (VuforiaTrackable trackable : allTrackables) {
@@ -284,12 +297,24 @@ public class VuforiaAiming extends OpMode {
             telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
             telemetry.addData("Needed Angle", Math.toDegrees(Math.atan(translation.get(0) / translation.get(2))));
             neededAngle = Math.toDegrees(Math.atan(translation.get(0) / translation.get(2)));
+            error = currentAngle - neededAngle;
+            if(error < 2 && error > -2) {
+                integral += error;
+            } else {
+                integral = 0;
+            }
+            derivative = lastError - error;
+            lastError = error;
+
+            rightMotor.setPower(-error * KP + integral * KI + derivative * KD);
+            leftMotor.setPower(error * KP + integral * KI + derivative * KD);
+
         }
         else {
             telemetry.addData("Visible Target", "none");
         }
 
-        if (neededAngle - robotAngle > 10) {
+        /*if (neededAngle - robotAngle > 10) {
 
             leftMotor.setPower(0.5);
             rightMotor.setPower(-0.5);
@@ -319,7 +344,7 @@ public class VuforiaAiming extends OpMode {
             rightMotor.setPower(0.0);
 
         }
-        telemetry.addData("Calculated Angle", neededAngle - robotAngle);
+        telemetry.addData("Calculated Angle", neededAngle - robotAngle);*/
 
         telemetry.update();
     }
