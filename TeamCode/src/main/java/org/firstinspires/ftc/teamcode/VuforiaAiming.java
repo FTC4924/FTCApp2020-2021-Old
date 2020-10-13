@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -58,6 +59,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 @TeleOp(name="VuforiaAiming")
 public class VuforiaAiming extends OpMode {
+
+    WebcamName webcamName = null;
 
     BNO055IMU imu;
     Orientation angles;
@@ -133,6 +136,8 @@ public class VuforiaAiming extends OpMode {
 
     public void init() {
 
+        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+
         rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
         leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -172,6 +177,7 @@ public class VuforiaAiming extends OpMode {
 
         vuforiaParameters.vuforiaLicenseKey = VUFORIA_KEY;
         vuforiaParameters.cameraDirection = CAMERA_CHOICE;
+        vuforiaParameters.cameraName = webcamName;
 
         vuforia = ClassFactory.getInstance().createVuforia(vuforiaParameters);
 
@@ -180,62 +186,62 @@ public class VuforiaAiming extends OpMode {
         stoneTarget = targetsSkyStone.get(0);
         stoneTarget.setName("Stone Target");
         stoneTarget.setLocation(OpenGLMatrix
-                .translation(0, 0, stoneZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         blueRearBridge = targetsSkyStone.get(1);
         blueRearBridge.setName("Blue Rear Bridge");
         blueRearBridge.setLocation(OpenGLMatrix
-                .translation(-bridgeX, bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, -bridgeRotY, bridgeRotZ)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         redRearBridge = targetsSkyStone.get(2);
         redRearBridge.setName("Red Rear Bridge");
         redRearBridge.setLocation(OpenGLMatrix
-                .translation(bridgeX, -bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, bridgeRotY, 0)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         redFrontBridge = targetsSkyStone.get(3);
         redFrontBridge.setName("Red Front Bridge");
         redFrontBridge.setLocation(OpenGLMatrix
-                .translation(-bridgeX, -bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, -bridgeRotY, 0)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         blueFrontBridge = targetsSkyStone.get(4);
         blueFrontBridge.setName("Blue Front Bridge");
         blueFrontBridge.setLocation(OpenGLMatrix
-                .translation(-bridgeX, bridgeY, bridgeZ)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, bridgeRotY, bridgeRotZ)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         red1 = targetsSkyStone.get(5);
         red1.setName("Red Perimeter 1");
         red1.setLocation(OpenGLMatrix
-                .translation(quadField, -halfField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         red2 = targetsSkyStone.get(6);
         red2.setName("Red Perimeter 2");
         red2.setLocation(OpenGLMatrix
-                .translation(-quadField, -halfField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         front1 = targetsSkyStone.get(7);
         front1.setName("Front Perimeter 1");
         front1.setLocation(OpenGLMatrix
-                .translation(-halfField, -quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0 , 0)));
 
         front2 = targetsSkyStone.get(8);
         front2.setName("Front Perimeter 2");
         front2.setLocation(OpenGLMatrix
-                .translation(-halfField, quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 90)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         blue1 = targetsSkyStone.get(9);
         blue1.setName("Blue Perimeter 1");
         blue1.setLocation(OpenGLMatrix
-                .translation(-quadField, halfField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         blue2 = targetsSkyStone.get(10);
         blue2.setName("Blue Perimeter 2");
@@ -246,20 +252,20 @@ public class VuforiaAiming extends OpMode {
         rear1 = targetsSkyStone.get(11);
         rear1.setName("Rear Perimeter 1");
         rear1.setLocation(OpenGLMatrix
-                .translation(halfField, quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , -90)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0 , 0)));
 
         rear2 = targetsSkyStone.get(12);
         rear2.setName("Rear Perimeter 2");
         rear2.setLocation(OpenGLMatrix
-                .translation(halfField, -quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
+                .translation(0, 0, 0)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 0, 0, 0)));
 
         allTrackables = new ArrayList<VuforiaTrackable>();
         allTrackables.addAll(targetsSkyStone);
 
         for (VuforiaTrackable trackable : allTrackables) {
-            ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, vuforiaParameters.cameraDirection);
+            ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(robotFromCamera, vuforiaParameters.cameraDirection);
         }
 
         targetsSkyStone.activate();
@@ -287,6 +293,8 @@ public class VuforiaAiming extends OpMode {
             }
         }
 
+        telemetry.addData("TargetVisible", targetVisible);
+
         if (targetVisible) {
 
             VectorF translation = lastLocation.getTranslation();
@@ -298,7 +306,37 @@ public class VuforiaAiming extends OpMode {
             telemetry.addData("Needed Angle", Math.toDegrees(Math.atan(translation.get(0) / translation.get(2))));
             neededAngle = Math.toDegrees(Math.atan(translation.get(0) / translation.get(2)));
             error = currentAngle - neededAngle;
-            if(error < 2 && error > -2) {
+            if (error > 2) {
+
+                leftMotor.setPower(error * 1/60);
+                rightMotor.setPower(-error * 1/60);
+
+            }
+
+            else if (error < -2) {
+
+                leftMotor.setPower(error * 1/60);
+                rightMotor.setPower(-error * 1/60);
+
+            }
+
+            /*else if (error > 0.625) {
+
+                leftMotor.setPower(error * 1/20);
+                rightMotor.setPower(-error * 1/20);
+
+            } else if (error < -0.625) {
+
+                leftMotor.setPower(-error * 1/20);
+                rightMotor.setPower(error * 1/20);
+
+            } else {
+
+                leftMotor.setPower(0.0);
+                rightMotor.setPower(0.0);
+
+            }*/
+            /*if(error < 2 && error > -2) {
                 integral += error;
             } else {
                 integral = 0;
@@ -307,44 +345,16 @@ public class VuforiaAiming extends OpMode {
             lastError = error;
 
             rightMotor.setPower(-error * KP + integral * KI + derivative * KD);
-            leftMotor.setPower(error * KP + integral * KI + derivative * KD);
+            leftMotor.setPower(error * KP + integral * KI + derivative * KD);*/
+            telemetry.addData("error", error);
 
         }
         else {
             telemetry.addData("Visible Target", "none");
-        }
-
-        /*if (neededAngle - robotAngle > 10) {
-
-            leftMotor.setPower(0.5);
-            rightMotor.setPower(-0.5);
-
-        }
-
-        else if (neededAngle - robotAngle < 10) {
-
-            leftMotor.setPower(-0.5);
-            rightMotor.setPower(0.5);
-
-        }
-
-        else if (neededAngle - robotAngle > 0.625) {
-
-            leftMotor.setPower(neededAngle - robotAngle);
-            rightMotor.setPower(-(neededAngle - robotAngle));
-
-        } else if (neededAngle - robotAngle < 0.625) {
-
-            leftMotor.setPower(-(neededAngle - robotAngle));
-            rightMotor.setPower(neededAngle - robotAngle);
-
-        } else {
-
             leftMotor.setPower(0.0);
             rightMotor.setPower(0.0);
-
         }
-        telemetry.addData("Calculated Angle", neededAngle - robotAngle);*/
+
 
         telemetry.update();
     }
